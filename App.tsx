@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { AnalysisPage } from './pages/AnalysisPage';
 import { RLConfigPage } from './pages/RLConfigPage';
 import { PrioritizationPage } from './pages/PrioritizationPage';
+import { ProjectsPage } from './pages/ProjectsPage';
 
 const App: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ const App: React.FC = () => {
       <Layout>
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/projects" element={<div className="p-12 text-center text-slate-400">Project Management Module (v1.0.1)</div>} />
+          <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/analysis" element={<AnalysisPage />} />
           <Route path="/rl-config" element={<RLConfigPage />} />
           <Route path="/prioritization" element={<PrioritizationPage />} />

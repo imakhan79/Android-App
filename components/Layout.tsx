@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, ShieldAlert, Cpu, ListOrdered, BarChart3, Settings } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, ShieldAlert, Cpu, ListOrdered, BarChart3, Settings, Database } from 'lucide-react';
+import { checkSupabaseConnection } from '../lib/supabase';
 
 const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
   const location = useLocation();
@@ -21,6 +22,12 @@ const NavItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: stri
 };
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [dbConnected, setDbConnected] = useState(false);
+
+  useEffect(() => {
+    checkSupabaseConnection().then(setDbConnected);
+  }, []);
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-10">
@@ -41,14 +48,23 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <NavItem to="/metrics" icon={BarChart3} label="Evaluation" />
         </nav>
         
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-slate-100 space-y-3">
+          <div className="flex items-center justify-between px-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Database size={10} /> Database
+            </span>
+            <div className={`flex items-center gap-1 text-[10px] font-bold ${dbConnected ? 'text-emerald-500' : 'text-slate-400'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${dbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></div>
+              {dbConnected ? 'CONNECTED' : 'LOCAL MOCK'}
+            </div>
+          </div>
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
               QA
             </div>
             <div>
-              <p className="text-sm font-semibold">Lead Engineer</p>
-              <p className="text-xs text-slate-500">Active Session</p>
+              <p className="text-sm font-semibold text-slate-700">Lead Engineer</p>
+              <p className="text-[10px] text-slate-400">Project aqkdrfaims...</p>
             </div>
           </div>
         </div>
@@ -58,11 +74,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <header className="mb-8 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">Workspace</h2>
-            <p className="text-slate-500 text-sm">Automated Android UI Exploration & Prioritization</p>
+            <p className="text-slate-500 text-sm font-medium">Automated Android UI Exploration & Prioritization</p>
           </div>
           <div className="flex gap-4">
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition shadow-md">
-              New Project
+            <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center gap-2">
+              <FolderKanban size={18} /> Switch Project
             </button>
           </div>
         </header>

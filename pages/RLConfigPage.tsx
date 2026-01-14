@@ -1,20 +1,30 @@
 
 import React, { useState } from 'react';
-// Added Activity to the imports to resolve "Cannot find name 'Activity'" error
-import { Settings2, Play, Sliders, Dna, Database, Terminal, Activity } from 'lucide-react';
+import { Settings2, Play, Sliders, Dna, Database, Terminal, Activity, BrainCircuit } from 'lucide-react';
 import { generateMockEpisodes } from '../mockData';
+import { getRlAgentReasoning } from '../lib/ai';
 import { EpisodeTest } from '../types';
 
 export const RLConfigPage: React.FC = () => {
   const [isExploring, setIsExploring] = useState(false);
   const [episodes, setEpisodes] = useState<EpisodeTest[]>([]);
+  const [aiLog, setAiLog] = useState<string[]>([]);
 
-  const startExploration = () => {
+  const startExploration = async () => {
     setIsExploring(true);
+    setAiLog(["[INIT] Hybrid RL Agent V3.1 Online", "[SYS] Establishing connection to emulator...", "[DDQN] Initializing Q-Table with random weights"]);
+    
+    // Simulate real exploration with AI reasoning
+    setTimeout(async () => {
+      const reasoning = await getRlAgentReasoning("MainActivity", ["TAP(Login)", "SWIPE(Gallery)", "BACK"]);
+      setAiLog(prev => [...prev, `[BRAIN] ${reasoning}`, "[ACTION] Selected: TAP(Login)", "[STATE] Transitioned to LoginActivity (Hash: 0x221)"]);
+    }, 1000);
+
     setTimeout(() => {
       setEpisodes(generateMockEpisodes('run-rl-99'));
       setIsExploring(false);
-    }, 3000);
+      setAiLog(prev => [...prev, "[COMPLETED] Run RUN-RL-99 finished. 15 episodes saved to Supabase."]);
+    }, 4500);
   };
 
   return (
@@ -22,53 +32,38 @@ export const RLConfigPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="font-bold flex items-center gap-2 mb-6">
+            <h3 className="font-bold flex items-center gap-2 mb-6 text-slate-800">
               <Settings2 size={18} className="text-indigo-600" />
               Agent Hyperparameters
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Policy Network (Actor)</label>
-                <select className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                <label className="text-xs font-bold text-slate-400 uppercase block mb-2">Policy Network (Actor)</label>
+                <select className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
                   <option>3-Layer MLP (ReLU)</option>
-                  <option>LSTM-Recurrent</option>
-                  <option>Transformer-based</option>
+                  <option>Transformer (GUI-Bert)</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Learning Rate (Alpha)</label>
+                <label className="text-xs font-bold text-slate-400 uppercase block mb-2">Learning Rate (Alpha)</label>
                 <input type="range" className="w-full accent-indigo-600" />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Exploration Rate (Epsilon)</label>
-                <div className="flex gap-2">
-                  <input type="number" defaultValue={0.15} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
-                </div>
               </div>
             </div>
           </div>
 
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="font-bold flex items-center gap-2 mb-6">
+            <h3 className="font-bold flex items-center gap-2 mb-6 text-slate-800">
               <Sliders size={18} className="text-indigo-600" />
               Reward Shaping
             </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center text-sm p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                <span className="font-medium">New State Discovery</span>
-                <span className="font-bold text-indigo-700">+5.0</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-xs p-3 bg-indigo-50 rounded-lg border border-indigo-100 font-bold">
+                <span className="text-indigo-700">New State Discovery</span>
+                <span className="text-indigo-800">+5.0</span>
               </div>
-              <div className="flex justify-between items-center text-sm p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                <span className="font-medium">High-Risk Interaction</span>
-                <span className="font-bold text-emerald-700">+3.0</span>
-              </div>
-              <div className="flex justify-between items-center text-sm p-3 bg-rose-50 rounded-lg border border-rose-100">
-                <span className="font-medium">App Crash Trigger</span>
-                <span className="font-bold text-rose-700">+10.0</span>
-              </div>
-              <div className="flex justify-between items-center text-sm p-3 bg-slate-50 rounded-lg border border-slate-200 opacity-60">
-                <span className="font-medium">Action Redundancy</span>
-                <span className="font-bold text-slate-700">-1.0</span>
+              <div className="flex justify-between items-center text-xs p-3 bg-rose-50 rounded-lg border border-rose-100 font-bold">
+                <span className="text-rose-700">App Crash Trigger</span>
+                <span className="text-rose-800">+10.0</span>
               </div>
             </div>
           </div>
@@ -76,77 +71,46 @@ export const RLConfigPage: React.FC = () => {
           <button
             onClick={startExploration}
             disabled={isExploring}
-            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${
-              isExploring ? 'bg-slate-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:-translate-y-1'
+            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-xl transition-all ${
+              isExploring ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:-translate-y-1'
             }`}
           >
-            {isExploring ? (
-              // Fix: Added Activity to lucide-react imports for this loading spinner
-              <Activity className="animate-spin" />
-            ) : (
-              <Play size={20} />
-            )}
-            {isExploring ? 'Explorer Running...' : 'Launch Hybrid RL Exploration'}
+            {isExploring ? <Activity className="animate-spin" /> : <Play size={20} />}
+            {isExploring ? 'Explorer Active...' : 'Launch Hybrid RL Exploration'}
           </button>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-slate-900 rounded-xl overflow-hidden flex flex-col h-[600px] shadow-2xl">
-            <div className="bg-slate-800 px-6 py-4 flex justify-between items-center border-b border-slate-700">
+          <div className="bg-slate-900 rounded-2xl overflow-hidden flex flex-col h-[600px] shadow-2xl border border-slate-800">
+            <div className="bg-slate-800/80 backdrop-blur px-6 py-4 flex justify-between items-center border-b border-slate-700/50">
               <div className="flex items-center gap-2 text-emerald-400">
                 <Terminal size={18} />
-                <span className="font-mono text-sm uppercase tracking-widest font-bold">Explorer Live Monitor</span>
+                <span className="font-mono text-xs uppercase tracking-widest font-black">Live Exploration Stream</span>
               </div>
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></div>
-                <span className="text-slate-400 text-[10px] font-bold">CONNECTED: EMULATOR_5554</span>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                <BrainCircuit size={12} className="text-indigo-400" />
+                REASONING: ON
               </div>
             </div>
             
-            <div className="flex-1 p-6 font-mono text-sm overflow-y-auto space-y-1">
-              {!isExploring && episodes.length === 0 && (
-                <div className="h-full flex items-center justify-center text-slate-600 italic">
-                  Waiting for exploration start signal...
+            <div className="flex-1 p-6 font-mono text-[11px] overflow-y-auto space-y-1.5 scrollbar-thin scrollbar-thumb-slate-700">
+              {aiLog.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-slate-600 space-y-4">
+                  <Activity size={48} className="opacity-20" />
+                  <p className="italic">Awaiting agent initialization...</p>
                 </div>
               )}
-              {isExploring && (
-                <div className="space-y-1">
-                  <p className="text-slate-500">[{new Date().toLocaleTimeString()}] Starting Actor-Critic Agent...</p>
-                  <p className="text-indigo-400">[{new Date().toLocaleTimeString()}] DDQN Target Network Initialized.</p>
-                  <p className="text-emerald-400">[{new Date().toLocaleTimeString()}] State 0x001 detected. Rewarding: +5.0</p>
-                  <p className="text-slate-300">[{new Date().toLocaleTimeString()}] Action: TAP -> ID(btn_login)</p>
-                  <p className="text-emerald-400">[{new Date().toLocaleTimeString()}] State 0x01A detected. Rewarding: +5.0</p>
-                  <p className="text-slate-300">[{new Date().toLocaleTimeString()}] Action: SWIPE_UP -> Gesture Component</p>
-                  <p className="text-emerald-400">[{new Date().toLocaleTimeString()}] Reward +3.0 (Gesture Interaction)</p>
-                  <p className="text-rose-400">[{new Date().toLocaleTimeString()}] !!! CRASH DETECTED !!! Signal 11 (SIGSEGV)</p>
-                  <p className="text-rose-400">[{new Date().toLocaleTimeString()}] Critical Reward: +10.0</p>
-                </div>
-              )}
-              {!isExploring && episodes.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {episodes.slice(0, 6).map(ep => (
-                    <div key={ep.id} className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-bold text-slate-400">{ep.id}</span>
-                        {ep.crashFlag && <span className="bg-rose-500/20 text-rose-500 px-2 py-0.5 rounded text-[10px] font-bold">CRASH</span>}
-                      </div>
-                      <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-xs text-slate-500">Total Reward</p>
-                          <p className="text-lg font-bold text-emerald-400">{ep.totalReward}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] text-slate-500">Steps: {ep.sequence.length}</p>
-                          <p className="text-[10px] text-slate-500">Depth: {ep.depth}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="md:col-span-2 flex justify-center py-4">
-                    <button className="bg-indigo-600 text-white px-6 py-2 rounded-full text-xs font-bold shadow-lg">View All 15 Generated Episodes</button>
-                  </div>
-                </div>
-              )}
+              {aiLog.map((line, i) => (
+                <p key={i} className={
+                  line.startsWith('[BRAIN]') ? 'text-indigo-400 italic bg-indigo-950/30 p-1 rounded' :
+                  line.startsWith('[ACTION]') ? 'text-white font-bold' :
+                  line.startsWith('[SYS]') ? 'text-slate-500' :
+                  line.startsWith('[DDQN]') ? 'text-amber-400' :
+                  'text-emerald-500'
+                }>
+                  {line}
+                </p>
+              ))}
             </div>
           </div>
         </div>
